@@ -18,14 +18,7 @@ The project is built from scratch — including positional encoding, masking, mu
 
 ---
 
-## 📂 Project Structure
 
-```
-.
-├── transformer_translation.py    # Full training & inference code
-├── README.md                     # Project documentation
-└── requirements.txt              # Python dependencies
-```
 
 ---
 
@@ -100,41 +93,3 @@ Learning rate increases at first and then decays.
 
 ---
 
-## 🚀 Getting Started
-
-### Installation
-
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/tharunchaitanya369/Encoder_Decoder_Transformer.git
-    cd Encoder_Decoder_Transformer
-    ```
-2. Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-### Usage
-
-Run the training and inference pipeline:
-```bash
-python transformer_translation.py
-```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-## ✉️ Contact
-
-For questions or collaborations, please open an issue or contact [tharunchaitanya369](https://github.com/tharunchaitanya369).
