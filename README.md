@@ -1,4 +1,5 @@
 # Transformer (Portuguese → English) — Deep explanation & code mapping
+The project is built from scratch — including positional encoding, masking, multi-head attention, encoder & decoder layers, and custom training loops — following the original "Attention is All You Need" paper. ([paper link](https://arxiv.org/abs/1706.03762))
 
 **Repository goal.** Train a Transformer encoder–decoder in TensorFlow to translate Portuguese → English using the `ted_hrlr_translate/pt_to_en` dataset. This README explains what each core Transformer concept *is*, the *math* behind it, the *shape flows* inside your code, and important implementation notes.
 
