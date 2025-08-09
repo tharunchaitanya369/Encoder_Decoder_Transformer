@@ -122,9 +122,12 @@ def get_angles(pos, i, d_model):
 
 For position `pos` and dimension `i` (0-indexed):
 
-* $	ext{angleate}(i) = 1 / 10000^{rac{2 loor{i/2}}{d_{model}}}$
-* $	ext{PE}_{pos,2k} = 	ext{sin}(pos 	imes 	ext{angleate}(2k))$
-* $	ext{PE}_{pos,2k+1} = 	ext{cos}(pos 	imes 	ext{angleate}(2k+1))$
+* $	ext{angle
+ate}(i) = 1 / 10000^{rac{2 loor{i/2}}{d_{model}}}$
+* $	ext{PE}_{pos,2k} = 	ext{sin}(pos 	imes 	ext{angle
+ate}(2k))$
+* $	ext{PE}_{pos,2k+1} = 	ext{cos}(pos 	imes 	ext{angle
+ate}(2k+1))$
 
 **Numeric worked example** (small numbers so you can follow)
 
@@ -135,14 +138,19 @@ Take `d_model = 4` and `pos = 2`. Compute `angle_rads` for i = 0,1,2,3.
   * `i//2 = 0`.
   * exponent = (2 * 0) / 4 = 0 / 4 = 0.
   * 10000^0 = 1.
-  * angleate = 1 / 1 = 1.
-  * anglead = pos * angleate = 2 * 1 = 2.
+  * angle
+ate = 1 / 1 = 1.
+  * angle
+ad = pos * angle
+ate = 2 * 1 = 2.
   * since i is even (0), PE = sin(2) ≈ 0.9092974268.
 
 * For i=1:
 
-  * `i//2 = 0` → same angleate = 1.
-  * anglead = 2 * 1 = 2.
+  * `i//2 = 0` → same angle
+ate = 1.
+  * angle
+ad = 2 * 1 = 2.
   * since i is odd (1), PE = cos(2) ≈ -0.4161468365.
 
 * For i=2:
@@ -150,14 +158,19 @@ Take `d_model = 4` and `pos = 2`. Compute `angle_rads` for i = 0,1,2,3.
   * `i//2 = 1`.
   * exponent = (2 * 1) / 4 = 2 / 4 = 0.5.
   * 10000^0.5 = sqrt(10000) = 100.
-  * angleate = 1 / 100 = 0.01.
-  * anglead = pos * angleate = 2 * 0.01 = 0.02.
+  * angle
+ate = 1 / 100 = 0.01.
+  * angle
+ad = pos * angle
+ate = 2 * 0.01 = 0.02.
   * i even (2), PE = sin(0.02) ≈ 0.0199986667.
 
 * For i=3:
 
-  * `i//2 = 1` → same angleate 0.01.
-  * anglead = 0.02.
+  * `i//2 = 1` → same angle
+ate 0.01.
+  * angle
+ad = 0.02.
   * i odd (3), PE = cos(0.02) ≈ 0.9998000067.
 
 So the positional encoding vector at `pos=2`, `d_model=4` is approximately:
@@ -452,76 +465,5 @@ class CustomSchedule(LearningRateSchedule):
 * Implement **beam search** with length normalization.
 * Add **label smoothing** to loss to avoid over-confident outputs.
 * Use **BLEU** or **sacreBLEU** for evaluation (not just printing translations).
-
----
-
-# 12 — Common pitfalls & fixes (practical)
-
-1. **Tokenizer & PAD collision**
-
-   * `padded_batch` pads with `0`. If your tokenizer can produce `0`, shift all token ids by +1 and reserve `0` for PAD, or call `padded_batch(..., padding_values=(PAD_ID, PAD_ID)).`
-
-2. **Building tokenizer consumes dataset**
-
-   * `build_from_corpus((pt.numpy() for pt, en in train), ...)` may consume the `train` dataset generator. To be safe, either:
-
-     * Use `train.as_numpy_iterator()` and materialize to a list for tokenizer build (may be memory intensive), or
-     * Build tokenizer from raw text files or `tfds.as_dataframe`.
-   * Best: save tokenizer to disk after creating it.
-
-3. **Large memory / OOM**
-
-   * Reduce `BATCH_SIZE`, use `mixed_precision`, or smaller `d_model`.
-   * Use `dataset.cache()` cautiously — only if dataset fits in memory.
-
-4. **Checkpointing**
-
-   * Add `tf.train.Checkpoint(transformer=transformer, optimizer=optimizer)` and save regularly.
-
-5. **Evaluation speed**
-
-   * Greedy decoding runs sequentially; beam search increases compute. Consider vectorized batch decoding if needed.
-
-6. **Reproducibility**
-
-   * Set seeds: `tf.random.set_seed(seed)`, `np.random.seed(seed)`.
-
----
-
-# 13 — Next steps & improvements
-
-* **Beam search** decoder (with beam width 4–10).
-* **Label smoothing** (e.g., smoothing factor 0.1).
-* **BLEU / sacreBLEU** evaluation for validation set.
-* **Larger model** experiments: `num_layers=6`, `d_model=512`, `dff=2048` (watch memory).
-* **Mixed precision training** (`tf.keras.mixed_precision.set_global_policy('mixed_float16')`).
-* **Use SentencePiece** or `tensorflow_text` for tokenizer.
-* **Export** tokenizer & model weights; wrap decoder for inference as a REST endpoint.
-
----
-
-# Appendix — mapping your functions/classes (quick reference)
-
-* `tf_encode`, `encode` — corpus encoding (builds token ids + start/end tokens)
-* `filter_max_length` — enforces `MAX_LENGTH`
-* `dot_product_attention` — scaled dot-product attention (mask handling)
-* `MultiHeadAttention` — projects, splits heads, calls `dot_product_attention`
-* `point_wise_feed_forward_network` — FFN inside layers
-* `positional_encoding`/`get_angles` — PE precomputation
-* `EncoderLayer`, `DecoderLayer` — single layer implementations
-* `Encoder`, `Decoder` — stacks of layers and embedding + PE logic
-* `Transformer` — full model and `create_masks` method
-* `CustomSchedule` — learning rate schedule
-* `train_step` & training loop — backprop and metrics
-* `evaluate`, `translate` — greedy inference
-
----
-
-# Final remarks — design choices in your code (summary)
-
-* You implemented the canonical Transformer design (multi-head, scaled dot-product attention, add & norm, FFN).
-* Your masks follow the standard approach: padding mask shape `(B,1,1,seq_len)`, look-ahead `(targ_len, targ_len)`, combined via `tf.maximum`.
-* The positional encoding is deterministic sinusoidal — good for experiments and for enabling relative position inference.
-* The training loop uses teacher forcing and a custom learning rate schedule as in the original paper.
 
 ---
